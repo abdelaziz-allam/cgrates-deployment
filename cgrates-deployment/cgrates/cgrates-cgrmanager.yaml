@@ -1,0 +1,49 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cgrmanager-deployment
+  labels:
+    app: cgrmanager
+  namespace: ricc-dev-itsyscom
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cgrmanager
+  template:
+    metadata:
+      labels:
+        app: cgrmanager
+    spec:
+      containers:
+      - name: cgrmanager
+        image: klstg-docker.slb-wartifactory-v.stg.rmn.local/riccdev/itsyscom/cgrmanager:latest
+        volumeMounts:
+        - mountPath: /etc/cgrates
+          name: managercfgs-vol
+        - mountPath: /var/lib/cgrates/tps
+          name: cgrtps-vol
+        - mountPath: /var/lib/cgrates/gooeys/gooey
+          name: gooey-vol
+        ports:
+        - containerPort: 2012
+        - containerPort: 2080
+        resources:
+          requests:
+            cpu: "10m"
+          limits:
+            cpu: "20m"
+
+      volumes:
+      - name: managercfgs-vol
+        persistentVolumeClaim:
+          claimName: managercfgs-pvc
+      - name: cgrtps-vol
+        persistentVolumeClaim:
+          claimName: cgrtps-pvc
+      - name: gooey-vol
+        persistentVolumeClaim:
+          claimName: gooey-pvc
+
+

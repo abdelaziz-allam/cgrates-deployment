@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pod-using-nfs-cgrmanager
+  labels:
+    app: pod-using-nfs-cgrmanager
+spec:
+  ports:
+  - port: 8098
+    name: pod-using-nfs-cgrmanager
+  clusterIP: None
+  selector:
+    app: pod-using-nfs-cgrmanager
+
+--- 
+apiVersion: apps/v1
+kind: StatefulSet
+metadata: 
+  labels: 
+    app: pod-using-nfs-cgrmanager
+  name: pod-using-nfs-cgrmanager-deployment
+  namespace: ricc-dev-itsyscom
+spec: 
+  replicas: 1
+  selector: 
+    matchLabels: 
+      app: pod-using-nfs-cgrmanager
+  serviceName: "pod-using-nfs-cgrmanager"
+  template: 
+    metadata: 
+      labels: 
+        app: pod-using-nfs-cgrmanager
+    spec: 
+      # Using CGRates volume claim as the volume
+      volumes:
+          - name: managercfgs-vol
+            persistentVolumeClaim:
+              claimName: ricc-cgrcfgs-pvc
+      
+      
+      # In this container, we'll mount the NFS volume
+      # and write to a file inside it.
+      containers:
+        - name: apptestnfs-usingpvc-cgrmanager
+          image: klstg-docker.slb-wartifactory-v.stg.rmn.local/riccdev/testv3
+      
+          # Mount the NFS volume in the container
+          volumeMounts:
+            - name: managercfgs-vol
+              mountPath: /etc/cgrates

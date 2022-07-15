@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pod-using-nfs-cgrtps
+  labels:
+    app: pod-using-nfs-cgrtps
+spec:
+  ports:
+  - port: 8098
+    name: pod-using-nfs-cgrtps
+  clusterIP: None
+  selector:
+    app: pod-using-nfs-cgrtps
+
+--- 
+apiVersion: apps/v1
+kind: StatefulSet
+metadata: 
+  labels: 
+    app: pod-using-nfs-cgrtps
+  name: pod-using-nfs-cgrtps-deployment
+  namespace: ricc-dev-itsyscom
+spec: 
+  replicas: 1
+  selector: 
+    matchLabels: 
+      app: pod-using-nfs-cgrtps
+  serviceName: "pod-using-nfs-cgrtps"
+  template: 
+    metadata: 
+      labels: 
+        app: pod-using-nfs-cgrtps
+    spec: 
+    
+      volumes:
+          - name: cgrtps-vol
+            persistentVolumeClaim:
+              claimName: ricc-cgrtps-pvc
+      
+      
+      # In this container, we'll mount the NFS volume
+      # and write to a file inside it.
+      containers:
+        - name: apptestnfs-usingpvc-cgrtps
+          image: klstg-docker.slb-wartifactory-v.stg.rmn.local/riccdev/testv3
+      
+          # Mount the NFS volume in the container
+          volumeMounts:
+            - name: cgrtps-vol
+              mountPath: /var/lib/cgrates/tps

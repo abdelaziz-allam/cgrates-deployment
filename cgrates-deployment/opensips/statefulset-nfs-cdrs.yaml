@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ricc-cdrs-pv
+spec:
+  storageClassName: robin
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteMany
+  persistentVolumeReclaimPolicy: Delete
+  nfs:
+    path: /export/cdrs
+    server: "[240b:c0e0:101:5582:ac00:2:0:a]"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - uhn7kls1arbwk001.rmnkiba.local
+          - uhn7kls1arbwk002.rmnkiba.local
+
+  claimRef:
+    name: ricc-cdrs-pvc
+    namespace: ricc-dev-itsyscom
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ricc-cdrs-pvc
+  namespace: ricc-dev-itsyscom
+spec:
+  storageClassName: robin
+  volumeName: ricc-cdrs-pv
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: pod-using-nfs-cdrs
+  labels:
+    app: pod-using-nfs-cdrs
+spec:
+  ports:
+  - port: 8098
+    name: pod-using-nfs-cdrs
+  clusterIP: None
+  selector:
+    app: pod-using-nfs-cdrs
+
+--- 
+apiVersion: apps/v1
+kind: StatefulSet
+metadata: 
+  labels: 
+    app: pod-using-nfs-cdrs
+  name: pod-using-nfs-cdrs-deployment
+  namespace: ricc-dev-itsyscom
+spec: 
+  replicas: 1
+  selector: 
+    matchLabels: 
+      app: pod-using-nfs-cdrs
+  serviceName: "pod-using-nfs-cdrs"
+  template: 
+    metadata: 
+      labels: 
+        app: pod-using-nfs-cdrs
+    spec: 
+      containers: 
+        - 
+          image: klstg-docker.slb-wartifactory-v.stg.rmn.local/riccdev/testv3
+          name: nfs-usingpvc-cdrs
+          volumeMounts: 
+            - 
+              mountPath: /etc/cdrs
+              name: cdrs-vol
+      volumes: 
+        - 
+          name: cdrs-vol
+          persistentVolumeClaim: 
+            claimName: ricc-cdrs-pvc

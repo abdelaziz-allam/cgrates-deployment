@@ -1,0 +1,132 @@
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: cgrtps-pv-3
+spec:
+  storageClassName: robin
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteMany
+  persistentVolumeReclaimPolicy: Delete
+  nfs:
+    path: /export/cgrtps
+    server: "[240b:c0e0:101:5582:ac00:2:0:a]"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - uhn7kls1arbwk001.rmnkiba.local
+          - uhn7kls1arbwk002.rmnkiba.local
+
+  claimRef:
+    name: cgrtps-pvc
+    namespace: ricc-dev-itsyscom
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: managercfgs-pv-3
+spec:
+  storageClassName: robin
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteMany
+  persistentVolumeReclaimPolicy: Delete
+  nfs:
+    path: /export/cgrmanager
+    server: "[240b:c0e0:101:5582:ac00:2:0:a]"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - uhn7kls1arbwk001.rmnkiba.local
+          - uhn7kls1arbwk002.rmnkiba.local
+
+  claimRef:
+    name: managercfgs-pvc
+    namespace: ricc-dev-itsyscom
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: gooey-pv-3
+spec:
+  storageClassName: robin
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteMany
+  persistentVolumeReclaimPolicy: Delete
+  nfs:
+    path: /export/gooey
+    server: "[240b:c0e0:101:5582:ac00:2:0:a]"
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - uhn7kls1arbwk001.rmnkiba.local
+          - uhn7kls1arbwk002.rmnkiba.local
+
+  claimRef:
+    name: gooey-pvc
+    namespace: ricc-dev-itsyscom
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cgrtps-pvc
+  namespace: ricc-dev-itsyscom
+spec:
+  storageClassName: robin
+  volumeName: cgrtps-pv-3
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: managercfgs-pvc
+  namespace: ricc-dev-itsyscom
+spec:
+  storageClassName: robin
+  volumeName: managercfgs-pv-3
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gooey-pvc
+  namespace: ricc-dev-itsyscom
+spec:
+  storageClassName: robin
+  volumeName: gooey-pv-3
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+
